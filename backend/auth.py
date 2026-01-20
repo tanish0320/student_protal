@@ -36,6 +36,10 @@ def register():
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
+    print("EMAIL:", email)
+    print("PASSWORD:", password)
+    print("USER FOUND:", user)
+
     data = request.get_json()
     if not data:
         return jsonify({"error": "Invalid JSON"}), 400
@@ -45,8 +49,12 @@ def login():
 
     user = mongo.db.users.find_one({"email": email})
 
-    if not user or not bcrypt.check_password_hash(user["password"], password):
+    if not user:
         return jsonify({"error": "Invalid credentials"}), 401
+
+    if not bcrypt.check_password_hash(user["password"], password):
+        return jsonify({"error": "Invalid credentials"}), 401
+
 
     token = create_access_token(identity=email)
 
